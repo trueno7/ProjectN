@@ -4,6 +4,24 @@ class ContactsController < ApplicationController
     end
     
     def create
+        @contact = Contact.new(contact_params)
+        if @contact.save
+            name = params[:contact][:name]
+            email = params[:contact][:email]
+            body = params[:contact][:body]
+            
+            ContactMailer.contact_email(name, email, body).deliver
+            
+            flash[:success] = "Message sent successfully"
+            redirect_to new_contact_path
+        else
+            flash[:danger] = "There has been an error, please get back to us later"
+            redirect_to new_contact_path
+        end
     end
     
+    private
+        def contact_params
+            params.require(:contact).permit(:name, :email, :comments)
+        end
 end
